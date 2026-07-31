@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phishing Analysis Report - {{ report.analysis_id }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <a href="/" class="bg-slate-800 hover:bg-slate-700 text-slate-300 p-2.5 rounded-xl transition">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </a>
+                <div>
+                    <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+                        Forensic Analysis Report <span class="text-xs bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 px-2 py-0.5 rounded-full font-mono">{{ report.analysis_id }}</span>
+                    </h1>
+                    <p class="text-xs text-slate-400">Processed at {{ report.timestamp }} &bull; SHA-256: {{ report.sha256[:16] }}...</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <a href="/api/export/{{ report.analysis_id }}?format=json" target="_blank" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2">
+                    <i class="fa-solid fa-code"></i> Export JSON
+                </a>
+                <a href="/api/export/{{ report.analysis_id }}?format=csv" target="_blank" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2">
+                    <i class="fa-solid fa-file-csv"></i> Export CSV
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Report Body -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-8 space-y-8">
+        <!-- Top Executive Summary Banner -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl grid grid-cols-1 md:grid-cols-4 gap-6 items-center">
+            <!-- Risk Score Gauge -->
+            <div class="flex flex-col items-center justify-center p-4 bg-slate-950/60 rounded-xl border border-slate-800">
+                <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold mb-1">Overall Risk Score</p>
+                <div class="text-4xl font-black 
+                    {% if report.scoring.risk_score > 80 %} text-rose-400 
+                    {% elif report.scoring.risk_score > 60 %} text-amber-400 
+                    {% elif report.scoring.risk_score > 40 %} text-yellow-400 
+                    {% else %} text-emerald-400 {% endif %}">
+                    {{ report.scoring.risk_score }}<span class="text-lg text-slate-500">/100</span>
+                </div>
+                <span class="mt-2 px-3 py-1 rounded-full text-xs font-semibold
+                    {% if report.scoring.severity == 'Critical Phishing' %} bg-rose-500/10 text-rose-400 border border-rose-500/20
+                    {% elif report.scoring.severity == 'High Risk' %} bg-amber-500/10 text-amber-400 border border-amber-500/20
+                    {% elif report.scoring.severity == 'Suspicious' %} bg-yellow-500/10 text-yellow-400 border border-yellow-500/20
+                    {% else %} bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 {% endif %}">
+                    {{ report.scoring.severity }}
+                </span>
+            </div>
+
+            <!-- Verdict & Classification -->
+            <div class="md:col-span-3 space-y-3">
+                <div>
+                    <span class="text-xs text-slate-400 uppercase font-semibold">Final Verdict</span>
+                    <h2 class="text-2xl font-black text-white mt-0.5">{{ report.scoring.verdict }}</h2>
+                </div>
+                <div>
+                    <span class="text-xs text-slate-400 uppercase font-semibold">Behavioral Classification</span>
+                    <p class="text-base font-bold text-indigo-400 mt-0.5"><i class="fa-solid fa-crosshairs mr-2"></i>{{ report.behavior.behavior_classification }} (Confidence: {{ report.behavior.behavior_confidence }}%)</p>
+                </div>
+                <div>
+                    <span class="text-xs text-slate-400 uppercase font-semibold">Evidence Summary</span>
+                    <p class="text-sm text-slate-300 mt-0.5">{{ report.recommendation.evidence_summary }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Metadata & Email Details -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Email Metadata -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+                <h3 class="text-base font-bold text-white flex items-center gap-2 border-b border-slate-800 pb-3">
+                    <i class="fa-solid fa-envelope text-indigo-400"></i> General Metadata
+                </h3>
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between border-b border-slate-800/60 pb-2">
+                        <span class="text-slate-400">Subject:</span>
+                        <span class="font-medium text-white text-right max-w-sm truncate">{{ report.parsed.metadata.subject }}</span>
+                    </div>
+                    <div class="flex justify-between border-b border-slate-800/60 pb-2">
+                        <span class="text-slate-400">From:</span>
+                        <span class="font-medium text-white text-right max-w-sm truncate">{{ report.parsed.metadata.from }}</span>
+                    </div>
+                    <div class="flex justify-between border-b border-slate-800/60 pb-2">
+                        <span class="text-slate-400">Reply-To:</span>
+                        <span class="font-medium text-slate-300 text-right max-w-sm truncate">{{ report.parsed.metadata.reply_to or 'None' }}</span>
+                    </div>
+                    <div class="flex justify-between border-b border-slate-800/60 pb-2">
+                        <span class="text-slate-400">Return-Path:</span>
+                        <span class="font-medium text-slate-300 text-right max-w-sm truncate">{{ report.parsed.metadata.return_path or 'None' }}</span>
+                    </div>
+                    <div class="flex justify-between pb-1">
+                        <span class="text-slate-400">Message-ID:</span>
+                        <span class="font-mono text-xs text-indigo-300 text-right max-w-sm truncate">{{ report.parsed.metadata.message_id or 'None' }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analyst Recommendations & MITRE -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+                <h3 class="text-base font-bold text-white flex items-center gap-2 border-b border-slate-800 pb-3">
+                    <i class="fa-solid fa-list-check text-indigo-400"></i> Analyst Recommendations & MITRE
+                </h3>
+                <div class="space-y-3 text-sm">
+                    <div>
+                        <span class="text-xs text-slate-400 font-semibold uppercase">MITRE ATT&CK Mapping</span>
+                        <div class="flex flex-wrap gap-2 mt-1">
+                            {% for m in report.recommendation.mitre_mapping %}
+                            <span class="bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 px-2.5 py-1 rounded-lg text-xs font-mono font-medium">{{ m }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div>
+                        <span class="text-xs text-slate-400 font-semibold uppercase">Suggested Actions</span>
+                        <ul class="list-disc list-inside space-y-1 mt-1 text-slate-300 text-xs">
+                            {% for action in report.recommendation.recommended_actions %}
+                            <li>{{ action }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Evidence Findings & Correlation -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+            <h3 class="text-lg font-bold text-white flex items-center gap-2 border-b border-slate-800 pb-3">
+                <i class="fa-solid fa-magnifying-glass-chart text-indigo-400"></i> Multi-Engine Evidence & Threat Indicators
+            </h3>
+
+            <!-- Supporting Evidence List -->
+            <div>
+                <h4 class="text-sm font-semibold text-rose-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Flagged Indicators ({{ report.correlation.supporting_evidence | length }})
+                </h4>
+                {% if report.correlation.supporting_evidence %}
+                <div class="space-y-2">
+                    {% for ev in report.correlation.supporting_evidence %}
+                    <div class="bg-slate-950 border border-rose-500/20 p-3 rounded-xl flex items-start gap-3">
+                        <i class="fa-solid fa-circle-exclamation text-rose-400 mt-0.5"></i>
+                        <p class="text-sm text-slate-200 font-mono">{{ ev }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-sm text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 p-3 rounded-xl">No malicious indicators flagged by detection engines.</p>
+                {% endif %}
+            </div>
+
+            <!-- Extracted URLs -->
+            {% if report.engines.url.extracted_urls %}
+            <div>
+                <h4 class="text-sm font-semibold text-indigo-400 uppercase tracking-wider mb-3">Extracted URLs ({{ report.engines.url.extracted_urls | length }})</h4>
+                <div class="space-y-2">
+                    {% for u in report.engines.url.extracted_urls %}
+                    <div class="bg-slate-950 border border-slate-800 p-3 rounded-xl flex items-center justify-between">
+                        <span class="font-mono text-xs text-indigo-300 truncate max-w-xl">{{ u.url }}</span>
+                        <div class="flex items-center gap-2">
+                            {% if u.is_ip %}<span class="bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded text-xs font-semibold">Raw IP</span>{% endif %}
+                            {% if not u.is_https %}<span class="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded text-xs font-semibold">Insecure HTTP</span>{% endif %}
+                            <span class="text-xs text-slate-400 font-bold">Risk: {{ u.risk_score }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Attachments -->
+            {% if report.engines.attachment.analyzed_attachments %}
+            <div>
+                <h4 class="text-sm font-semibold text-indigo-400 uppercase tracking-wider mb-3">Analyzed Attachments ({{ report.engines.attachment.analyzed_attachments | length }})</h4>
+                <div class="space-y-2">
+                    {% for att in report.engines.attachment.analyzed_attachments %}
+                    <div class="bg-slate-950 border border-slate-800 p-3 rounded-xl flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-white">{{ att.filename }}</p>
+                            <p class="text-xs text-slate-400 font-mono">SHA-256: {{ att.sha256 }}</p>
+                        </div>
+                        <span class="text-xs font-bold {% if att.risk_score > 40 %}text-rose-400{% else %}text-emerald-400{% endif %}">Risk: {{ att.risk_score }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 bg-slate-900/60 py-6 text-center text-xs text-slate-500">
+        <p>PhishGuard Enterprise Security Platform &bull; Next-Gen Phishing Analysis Algorithm v2.0</p>
+    </footer>
+</body>
+</html>

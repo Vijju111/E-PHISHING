@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  phishguard-app:
+    build: .
+    container_name: phishguard_app
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=production
+      - DEBUG=false
+      - SUPABASE_URL=${SUPABASE_URL:-https://placeholder.supabase.co}
+      - SUPABASE_KEY=${SUPABASE_KEY:-placeholder_key}
+    volumes:
+      - phishguard_storage:/root/phishing_tool_storage
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  phishguard_storage:

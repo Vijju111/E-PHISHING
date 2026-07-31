@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forensic Analysis Report - {{ report.analysis_id }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col">
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <a href="/" class="bg-slate-800 hover:bg-slate-700 text-slate-300 p-2.5 rounded-xl transition" title="Back to Dashboard">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </a>
+                <div>
+                    <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+                        Enterprise Forensic Report <span class="text-xs bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 px-2 py-0.5 rounded-full font-mono">{{ report.analysis_id }}</span>
+                    </h1>
+                    <p class="text-xs text-slate-400">Evaluated at {{ report.timestamp }} &bull; SHA-256: {{ report.sha256[:16] }}...</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <a href="/api/v1/export/pdf/{{ report.analysis_id }}" target="_blank" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2">
+                    <i class="fa-solid fa-file-pdf"></i> PDF
+                </a>
+                <a href="/api/v1/export/json/{{ report.analysis_id }}" target="_blank" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2">
+                    <i class="fa-solid fa-code"></i> JSON
+                </a>
+                <a href="/api/v1/export/csv/{{ report.analysis_id }}" target="_blank" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2">
+                    <i class="fa-solid fa-file-csv"></i> CSV
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-8 space-y-8">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl grid grid-cols-1 md:grid-cols-4 gap-6 items-center">
+            <div class="flex flex-col items-center justify-center p-4 bg-slate-950/60 rounded-xl border border-slate-800">
+                <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold mb-1">Risk Score</p>
+                <div class="text-4xl font-black 
+                    {% if report.scoring.risk_score > 80 %} text-rose-400 
+                    {% elif report.scoring.risk_score > 60 %} text-amber-400 
+                    {% elif report.scoring.risk_score > 40 %} text-yellow-400 
+                    {% else %} text-emerald-400 {% endif %}">
+                    {{ report.scoring.risk_score }}<span class="text-lg text-slate-500">/100</span>
+                </div>
+                <span class="mt-2 px-3 py-1 rounded-full text-xs font-semibold
+                    {% if report.scoring.severity == 'Critical Phishing' or report.scoring.severity == 'High Risk' %} bg-rose-500/10 text-rose-400 border border-rose-500/20
+                    {% else %} bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 {% endif %}">
+                    {{ report.scoring.severity }}
+                </span>
+            </div>
+
+            <div class="md:col-span-3 space-y-3">
+                <div>
+                    <span class="text-xs text-slate-400 uppercase font-semibold">True Conclusion / Verdict</span>
+                    <h2 class="text-2xl font-black text-white mt-0.5">{{ report.scoring.verdict }}</h2>
+                </div>
+                <div>
+                    <span class="text-xs text-slate-400 uppercase font-semibold">Behavioral Classification</span>
+                    <p class="text-base font-bold text-indigo-400 mt-0.5"><i class="fa-solid fa-crosshairs mr-2"></i>{{ report.behavior.behavior_classification }} (Confidence: {{ report.behavior.behavior_confidence }}%)</p>
+                </div>
+                <div>
+                    <span class="text-xs text-slate-400 uppercase font-semibold">Evidence Summary</span>
+                    <p class="text-sm text-slate-300 mt-0.5">{{ report.recommendation.evidence_summary }}</p>
+                </div>
+            </div>
+        </div>
+
+        
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2 border-b border-slate-800 pb-3">
+                <i class="fa-solid fa-envelope-open-text text-indigo-400"></i> Complete Email Date & Header Details
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div class="space-y-2">
+                    <div class="flex justify-between border-b border-slate-800/60 pb-2">
+                        <span class="text-slate-400">Email Date:</span>
+                        <span class="font-medium text-white text-right">{{ report.parsed.metadata.date or 'N/A' }}</span>
+                    </div>
+                    <div class="flex justify-between border-b border-slate-800/60 pb-2">
+                        <span class="text-slate-400">Subject:</span>
+                        <span class="font-medium text-white text-right truncate max-w-xs">{{ report.parsed.metadata.subject or 'N/A' }}</span>
+                    </div>
+                    <div class="flex justify-between border-b border-slate-800/60 pb-2">
+                        <span class="text-slate-400">From (Sender):</span>
+                        <span class="font-medium text-white text-right truncate max-w-xs">{{ report.parsed.metadata.from or 'N/A' }}</span>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <div class="flex justify-between border-b border-slate-800/60 pb-2">
+                        <span class="text-slate-400">To (Recipient):</span>
+                        <span class="font-medium text-white text-right truncate max-w-xs">{{ report.parsed.metadata.to or 'N/A' }}</span>
+                    </div>
+                    <div class="flex justify-between border-b border-slate-800/60 pb-2">
+                        <span class="text-slate-400">Reply-To:</span>
+                        <span class="font-medium text-slate-300 text-right truncate max-w-xs">{{ report.parsed.metadata.reply_to or 'None' }}</span>
+                    </div>
+                    <div class="flex justify-between border-b border-slate-800/60 pb-2">
+                        <span class="text-slate-400">Return-Path:</span>
+                        <span class="font-medium text-slate-300 text-right truncate max-w-xs">{{ report.parsed.metadata.return_path or 'None' }}</span>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <span class="text-xs text-slate-400">Message-ID:</span>
+                <p class="font-mono text-xs text-indigo-300 bg-slate-950 p-2.5 rounded-xl mt-1 border border-slate-800 break-all">{{ report.parsed.metadata.message_id or 'None' }}</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-2">
+                <div class="flex items-center justify-between text-xs text-slate-400 font-semibold uppercase">
+                    <span>1. Header Analysis</span>
+                    <i class="fa-solid fa-heading text-indigo-400"></i>
+                </div>
+                <p class="text-sm font-bold text-white">Risk: {{ report.engines.header.risk_score }}/100</p>
+                <p class="text-xs text-slate-300 truncate">{{ report.engines.header.findings[0] if report.engines.header.findings else 'No anomalies detected' }}</p>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-2">
+                <div class="flex items-center justify-between text-xs text-slate-400 font-semibold uppercase">
+                    <span>2. SPF / DKIM / DMARC</span>
+                    <i class="fa-solid fa-fingerprint text-indigo-400"></i>
+                </div>
+                <p class="text-sm font-bold text-white">Risk: {{ report.engines.auth.risk_score }}/100</p>
+                <div class="flex gap-1 text-[10px] font-mono">
+                    <span class="px-1.5 py-0.5 rounded bg-slate-950 text-slate-300">SPF: {{ report.engines.auth.metadata.spf }}</span>
+                    <span class="px-1.5 py-0.5 rounded bg-slate-950 text-slate-300">DKIM: {{ report.engines.auth.metadata.dkim }}</span>
+                    <span class="px-1.5 py-0.5 rounded bg-slate-950 text-slate-300">DMARC: {{ report.engines.auth.metadata.dmarc }}</span>
+                </div>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-2">
+                <div class="flex items-center justify-between text-xs text-slate-400 font-semibold uppercase">
+                    <span>3. Domain & MX DNS</span>
+                    <i class="fa-solid fa-globe text-indigo-400"></i>
+                </div>
+                <p class="text-sm font-bold text-white">Risk: {{ report.engines.domain.risk_score }}/100</p>
+                <p class="text-xs text-slate-300 truncate">Domain: {{ report.engines.domain.metadata.sender_domain or 'N/A' }}</p>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-2">
+                <div class="flex items-center justify-between text-xs text-slate-400 font-semibold uppercase">
+                    <span>4. Sender Trust</span>
+                    <i class="fa-solid fa-user-shield text-indigo-400"></i>
+                </div>
+                <p class="text-sm font-bold text-white">Risk: {{ report.engines.sender.risk_score }}/100</p>
+                <p class="text-xs text-slate-300 truncate">{{ report.engines.sender.metadata.display_name or 'Verified' }}</p>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-2">
+                <div class="flex items-center justify-between text-xs text-slate-400 font-semibold uppercase">
+                    <span>5. URL Intelligence</span>
+                    <i class="fa-solid fa-link text-indigo-400"></i>
+                </div>
+                <p class="text-sm font-bold text-white">Risk: {{ report.engines.url.risk_score }}/100</p>
+                <p class="text-xs text-slate-300">URLs Found: {{ report.engines.url.metadata.extracted_urls | length }}</p>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-2">
+                <div class="flex items-center justify-between text-xs text-slate-400 font-semibold uppercase">
+                    <span>6. Attachments</span>
+                    <i class="fa-solid fa-paperclip text-indigo-400"></i>
+                </div>
+                <p class="text-sm font-bold text-white">Risk: {{ report.engines.attachment.risk_score }}/100</p>
+                <p class="text-xs text-slate-300">Files: {{ report.engines.attachment.metadata.analyzed_attachments | length }}</p>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-2">
+                <div class="flex items-center justify-between text-xs text-slate-400 font-semibold uppercase">
+                    <span>7. Content & Urgency</span>
+                    <i class="fa-solid fa-triangle-exclamation text-indigo-400"></i>
+                </div>
+                <p class="text-sm font-bold text-white">Risk: {{ report.engines.content.risk_score }}/100</p>
+                <p class="text-xs text-slate-300 truncate">Urgency: {{ report.engines.content.metadata.urgency | length }} trigger(s)</p>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-2">
+                <div class="flex items-center justify-between text-xs text-slate-400 font-semibold uppercase">
+                    <span>8. Brand Impersonation</span>
+                    <i class="fa-solid fa-shield-cat text-indigo-400"></i>
+                </div>
+                <p class="text-sm font-bold text-white">Risk: {{ report.engines.brand.risk_score }}/100</p>
+                <p class="text-xs text-slate-300 truncate">Brand: {{ report.engines.brand.metadata.detected_brand or 'None' }}</p>
+            </div>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+            <h3 class="text-lg font-bold text-white flex items-center gap-2 border-b border-slate-800 pb-3">
+                <i class="fa-solid fa-magnifying-glass-chart text-indigo-400"></i> Comprehensive Evidence & Threat Indicators
+            </h3>
+
+            <div>
+                <h4 class="text-sm font-semibold text-rose-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-shield-dog"></i> Flagged Indicators ({{ report.correlation.supporting_evidence | length }})
+                </h4>
+                {% if report.correlation.supporting_evidence %}
+                <div class="space-y-2">
+                    {% for ev in report.correlation.supporting_evidence %}
+                    <div class="bg-slate-950 border border-rose-500/20 p-3 rounded-xl flex items-start gap-3">
+                        <i class="fa-solid fa-circle-exclamation text-rose-400 mt-0.5"></i>
+                        <p class="text-sm text-slate-200 font-mono">{{ ev }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-sm text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 p-3 rounded-xl">No malicious indicators flagged. Email verified safe.</p>
+                {% endif %}
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-800">
+                <div>
+                    <span class="text-xs text-slate-400 font-semibold uppercase">MITRE ATT&CK Mapping</span>
+                    <div class="flex flex-wrap gap-2 mt-2">
+                        {% for m in report.recommendation.mitre_mapping %}
+                        <span class="bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 px-2.5 py-1 rounded-lg text-xs font-mono font-medium">{{ m }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div>
+                    <span class="text-xs text-slate-400 font-semibold uppercase">Recommended Actions</span>
+                    <ul class="list-disc list-inside space-y-1 mt-2 text-slate-300 text-xs">
+                        {% for action in report.recommendation.recommended_actions %}
+                        <li>{{ action }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="border-t border-slate-800 bg-slate-900/60 py-6 text-center text-xs text-slate-500">
+        <p>PhishGuard Enterprise Security Platform &bull; OWASP Hardened &bull; Real-Time DNS Architecture</p>
+    </footer>
+</body>
+</html>

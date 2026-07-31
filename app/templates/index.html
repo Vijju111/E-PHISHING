@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Phishing Analysis Engine | Next-Gen v2.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col">
+    <!-- Top Navigation -->
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-indigo-600 text-white p-2.5 rounded-xl shadow-lg shadow-indigo-600/30">
+                    <i class="fa-solid fa-shield-halved text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+                        PhishGuard Enterprise <span class="text-xs bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 px-2 py-0.5 rounded-full">v2.0 Multi-Engine</span>
+                    </h1>
+                    <p class="text-xs text-slate-400">Next-Generation 20-Phase Phishing Analysis & Threat Intelligence Framework</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <span class="flex items-center text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-full">
+                    <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse mr-2"></i></span> All 20 Engines Active
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-8 space-y-8">
+        <!-- Stats Bar -->
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
+                <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Total Analyses</p>
+                <p class="text-3xl font-black text-white mt-2">{{ stats.total_scans }}</p>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
+                <p class="text-xs text-rose-400 uppercase tracking-wider font-semibold">Critical Phishing</p>
+                <p class="text-3xl font-black text-rose-400 mt-2">{{ stats.critical_count }}</p>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
+                <p class="text-xs text-amber-400 uppercase tracking-wider font-semibold">High Risk</p>
+                <p class="text-3xl font-black text-amber-400 mt-2">{{ stats.high_count }}</p>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
+                <p class="text-xs text-yellow-400 uppercase tracking-wider font-semibold">Suspicious</p>
+                <p class="text-3xl font-black text-yellow-400 mt-2">{{ stats.suspicious_count }}</p>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
+                <p class="text-xs text-emerald-400 uppercase tracking-wider font-semibold">Safe / Legitimate</p>
+                <p class="text-3xl font-black text-emerald-400 mt-2">{{ stats.safe_count }}</p>
+            </div>
+        </div>
+
+        <!-- Action Grid: Upload & Test -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- EML Upload Box -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
+                <div>
+                    <h2 class="text-lg font-bold text-white flex items-center gap-2 mb-2">
+                        <i class="fa-solid fa-file-arrow-up text-indigo-400"></i> Upload Email File (.eml / .msg)
+                    </h2>
+                    <p class="text-sm text-slate-400 mb-6">Upload raw RFC822 `.eml` or Outlook `.msg` file for instant multi-engine forensic parsing and risk scoring.</p>
+                    
+                    <form id="emlForm" class="space-y-4">
+                        <div class="border-2 border-dashed border-slate-700 hover:border-indigo-500 transition rounded-xl p-8 text-center cursor-pointer bg-slate-950/50" onclick="document.getElementById('emlFileInput').click()">
+                            <i class="fa-solid fa-cloud-arrow-up text-4xl text-indigo-400 mb-3"></i>
+                            <p class="text-sm font-medium text-slate-200" id="fileLabel">Click to browse or drag & drop .eml file here</p>
+                            <p class="text-xs text-slate-500 mt-1">Supports up to 50MB</p>
+                            <input type="file" id="emlFileInput" class="hidden" accept=".eml,.msg,.txt">
+                        </div>
+                    </form>
+                </div>
+                
+                <button type="button" id="uploadBtn" class="mt-6 w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-xl transition shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-radar"></i> Run 20-Phase Analysis Engine
+                </button>
+            </div>
+
+            <!-- Manual Raw Submission Box -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
+                <div>
+                    <h2 class="text-lg font-bold text-white flex items-center gap-2 mb-2">
+                        <i class="fa-solid fa-terminal text-indigo-400"></i> Direct Email Content Submission
+                    </h2>
+                    <p class="text-sm text-slate-400 mb-4">Quickly test raw headers, subject, sender, and email body content against heuristic engines.</p>
+                    
+                    <form id="textForm" class="space-y-3">
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="text-xs text-slate-400 font-medium">Sender From</label>
+                                <input type="text" id="rawSender" placeholder="ceo@microsoft-support.xyz" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <label class="text-xs text-slate-400 font-medium">Subject</label>
+                                <input type="text" id="rawSubject" placeholder="Urgent: Verify Account Immediately" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-xs text-slate-400 font-medium">Email Body Content (with URLs or malicious text)</label>
+                            <textarea id="rawBody" rows="4" placeholder="Dear User, Your account has been suspended. Click here to verify: http://phishing-secure-login.com/login" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"></textarea>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="flex gap-3 mt-4">
+                    <button type="button" id="loadSamplePhish" class="w-1/2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium py-3 rounded-xl transition text-sm">
+                        Load Sample Phish
+                    </button>
+                    <button type="button" id="submitTextBtn" class="w-1/2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-xl transition shadow-lg shadow-indigo-600/30 text-sm">
+                        Analyze Raw Content
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Processing Modal / Spinner Overlay -->
+        <div id="loadingOverlay" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex flex-col items-center justify-center space-y-4">
+            <div class="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+            <h3 class="text-xl font-bold text-white">Executing 20-Phase Phishing Analysis Pipeline...</h3>
+            <p class="text-sm text-slate-400">Running header inspection, SPF/DKIM/DMARC, URL heuristics, ML classification & IOC correlation.</p>
+        </div>
+
+        <!-- Historical Analyses Section -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left text-indigo-400"></i> Recent Analysis History & Threat Feed
+                </h2>
+                <span class="text-xs text-slate-400">Showing last {{ history | length }} evaluations</span>
+            </div>
+
+            {% if history %}
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-slate-800 text-xs text-slate-400 uppercase tracking-wider">
+                            <th class="py-3 px-4">Analysis ID</th>
+                            <th class="py-3 px-4">Timestamp</th>
+                            <th class="py-3 px-4">Subject</th>
+                            <th class="py-3 px-4">Sender</th>
+                            <th class="py-3 px-4">Risk Score</th>
+                            <th class="py-3 px-4">Severity</th>
+                            <th class="py-3 px-4">Verdict</th>
+                            <th class="py-3 px-4 text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-800/60 text-sm">
+                        {% for item in history %}
+                        <tr class="hover:bg-slate-800/40 transition">
+                            <td class="py-3 px-4 font-mono text-xs text-indigo-400">{{ item.analysis_id[:8] }}...</td>
+                            <td class="py-3 px-4 text-xs text-slate-400">{{ item.timestamp[:19].replace('T', ' ') }}</td>
+                            <td class="py-3 px-4 font-medium text-white max-w-xs truncate">{{ item.subject }}</td>
+                            <td class="py-3 px-4 text-slate-300 max-w-xs truncate">{{ item.from }}</td>
+                            <td class="py-3 px-4 font-bold 
+                                {% if item.risk_score > 80 %} text-rose-400 
+                                {% elif item.risk_score > 60 %} text-amber-400 
+                                {% elif item.risk_score > 40 %} text-yellow-400 
+                                {% else %} text-emerald-400 {% endif %}">
+                                {{ item.risk_score }}/100
+                            </td>
+                            <td class="py-3 px-4">
+                                <span class="px-2.5 py-1 rounded-full text-xs font-semibold
+                                    {% if item.severity == 'Critical Phishing' %} bg-rose-500/10 text-rose-400 border border-rose-500/20
+                                    {% elif item.severity == 'High Risk' %} bg-amber-500/10 text-amber-400 border border-amber-500/20
+                                    {% elif item.severity == 'Suspicious' %} bg-yellow-500/10 text-yellow-400 border border-yellow-500/20
+                                    {% else %} bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 {% endif %}">
+                                    {{ item.severity }}
+                                </span>
+                            </td>
+                            <td class="py-3 px-4 text-xs font-semibold text-slate-300">{{ item.verdict }}</td>
+                            <td class="py-3 px-4 text-right">
+                                <a href="/report/{{ item.analysis_id }}" class="bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white px-3 py-1.5 rounded-lg text-xs font-medium transition border border-indigo-500/30">
+                                    View Report <i class="fa-solid fa-arrow-right ml-1"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-12">
+                <i class="fa-solid fa-shield text-5xl text-slate-700 mb-3"></i>
+                <p class="text-slate-400">No email analyses recorded yet. Upload an .eml file or submit raw content above to begin.</p>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 bg-slate-900/60 py-6 text-center text-xs text-slate-500">
+        <p>PhishGuard Enterprise Security Platform &bull; Next-Gen Phishing Analysis Algorithm v2.0 &bull; Powered by Multi-Engine Threat Intelligence</p>
+    </footer>
+
+    <script>
+        const fileInput = document.getElementById('emlFileInput');
+        const fileLabel = document.getElementById('fileLabel');
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                fileLabel.textContent = `Selected: ${e.target.files[0].name}`;
+            }
+        });
+
+        document.getElementById('uploadBtn').addEventListener('click', async () => {
+            if (fileInput.files.length === 0) {
+                alert('Please select an .eml or .msg file first.');
+                return;
+            }
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            try {
+                const response = await axios.post('/api/analyze/eml', formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
+                if (response.data.status === 'success') {
+                    window.location.href = `/report/${response.data.analysis_id}`;
+                }
+            } catch (err) {
+                alert('Analysis failed: ' + (err.response?.data?.detail || err.message));
+                document.getElementById('loadingOverlay').classList.add('hidden');
+            }
+        });
+
+        document.getElementById('loadSamplePhish').addEventListener('click', () => {
+            document.getElementById('rawSender').value = 'security-alert@microsoft-support.xyz';
+            document.getElementById('rawSubject').value = 'URGENT: Microsoft 365 Account Suspension Warning';
+            document.getElementById('rawBody').value = 'Dear Administrator,\n\nYour Microsoft 365 subscription is set to expire immediately due to billing failure. To prevent account termination, please verify your credentials instantly at http://phishing-secure-login.com/auth/verify\n\nSincerely,\nMicrosoft Security Team';
+        });
+
+        document.getElementById('submitTextBtn').addEventListener('click', async () => {
+            const sender = document.getElementById('rawSender').value;
+            const subject = document.getElementById('rawSubject').value;
+            const body = document.getElementById('rawBody').value;
+
+            if (!sender || !subject || !body) {
+                alert('Please fill in sender, subject, and body content.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('sender', sender);
+            formData.append('subject', subject);
+            formData.append('body', body);
+
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            try {
+                const response = await axios.post('/api/analyze/text', formData);
+                if (response.data.status === 'success') {
+                    window.location.href = `/report/${response.data.analysis_id}`;
+                }
+            } catch (err) {
+                alert('Analysis failed: ' + (err.response?.data?.detail || err.message));
+                document.getElementById('loadingOverlay').classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
