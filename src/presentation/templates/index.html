@@ -10,9 +10,8 @@
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col">
     {% if not is_verified %}
-    
     <div id="mathGateModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 max-w-md w-full shadow-2xl space-y-6 text-center">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-6 text-center">
             <div class="inline-flex bg-indigo-600/20 text-indigo-400 p-4 rounded-2xl border border-indigo-500/30">
                 <i class="fa-solid fa-shield-halved text-3xl"></i>
             </div>
@@ -67,87 +66,81 @@
     </script>
     {% endif %}
 
-    
-    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div class="flex items-center space-x-3">
                 <div class="bg-indigo-600 text-white p-2.5 rounded-xl shadow-lg shadow-indigo-600/30">
                     <i class="fa-solid fa-shield-halved text-xl"></i>
                 </div>
                 <div>
-                    <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
-                        PhishGuard Enterprise <span class="text-xs bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 px-2 py-0.5 rounded-full">v1.0 Production SOC</span>
+                    <h1 class="text-lg sm:text-xl font-bold tracking-tight text-white flex items-center gap-2">
+                        PhishGuard Enterprise <span class="text-[10px] sm:text-xs bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 px-2 py-0.5 rounded-full">v1.0 Production SOC</span>
                     </h1>
                     <p class="text-xs text-slate-400">Next-Generation Real-Time DNS & 16-Engine Phishing Analysis Platform</p>
                 </div>
             </div>
-            <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2">
                 <span class="flex items-center text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-full">
-                    <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse mr-2"></span> OWASP Hardened & Live DNS Active
+                    <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse mr-2"></span> Session Isolated & Live DNS Active
                 </span>
             </div>
         </div>
     </header>
 
-    
-    <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-8 space-y-8">
-        
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-            <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-6 sm:py-8 space-y-6 sm:space-y-8">
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3 sm:gap-4">
+            <div class="bg-slate-900 border border-slate-800 p-4 sm:p-5 rounded-2xl col-span-2 md:col-span-1">
                 <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Total Scans</p>
-                <p class="text-3xl font-black text-white mt-2">{{ stats.total_scans }}</p>
+                <p class="text-2xl sm:text-3xl font-black text-white mt-1 sm:mt-2">{{ stats.total_scans }}</p>
             </div>
-            <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
+            <div class="bg-slate-900 border border-slate-800 p-4 sm:p-5 rounded-2xl">
                 <p class="text-xs text-rose-400 uppercase tracking-wider font-semibold">Critical Threat</p>
-                <p class="text-3xl font-black text-rose-400 mt-2">{{ stats.critical_count }}</p>
+                <p class="text-2xl sm:text-3xl font-black text-rose-400 mt-1 sm:mt-2">{{ stats.critical_count }}</p>
             </div>
-            <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
+            <div class="bg-slate-900 border border-slate-800 p-4 sm:p-5 rounded-2xl">
                 <p class="text-xs text-amber-400 uppercase tracking-wider font-semibold">High Risk</p>
-                <p class="text-3xl font-black text-amber-400 mt-2">{{ stats.high_count }}</p>
+                <p class="text-2xl sm:text-3xl font-black text-amber-400 mt-1 sm:mt-2">{{ stats.high_count }}</p>
             </div>
-            <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
+            <div class="bg-slate-900 border border-slate-800 p-4 sm:p-5 rounded-2xl">
                 <p class="text-xs text-yellow-400 uppercase tracking-wider font-semibold">Suspicious</p>
-                <p class="text-3xl font-black text-yellow-400 mt-2">{{ stats.suspicious_count }}</p>
+                <p class="text-2xl sm:text-3xl font-black text-yellow-400 mt-1 sm:mt-2">{{ stats.suspicious_count }}</p>
             </div>
-            <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
+            <div class="bg-slate-900 border border-slate-800 p-4 sm:p-5 rounded-2xl">
                 <p class="text-xs text-emerald-400 uppercase tracking-wider font-semibold">Safe / Legitimate</p>
-                <p class="text-3xl font-black text-emerald-400 mt-2">{{ stats.safe_count }}</p>
+                <p class="text-2xl sm:text-3xl font-black text-emerald-400 mt-1 sm:mt-2">{{ stats.safe_count }}</p>
             </div>
         </div>
 
-        
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl flex flex-col justify-between">
                 <div>
-                    <h2 class="text-lg font-bold text-white flex items-center gap-2 mb-2">
+                    <h2 class="text-base sm:text-lg font-bold text-white flex items-center gap-2 mb-2">
                         <i class="fa-solid fa-file-arrow-up text-indigo-400"></i> Upload Email File (.eml / .msg)
                     </h2>
-                    <p class="text-sm text-slate-400 mb-6">Upload raw RFC822 `.eml` or Outlook `.msg` file for instant multi-engine forensic parsing.</p>
+                    <p class="text-xs sm:text-sm text-slate-400 mb-6">Upload raw RFC822 `.eml` or Outlook `.msg` file for instant multi-engine forensic parsing.</p>
                     
-                    <div class="border-2 border-dashed border-slate-700 hover:border-indigo-500 transition rounded-xl p-8 text-center cursor-pointer bg-slate-950/50" onclick="document.getElementById('emlFileInput').click()">
-                        <i class="fa-solid fa-cloud-arrow-up text-4xl text-indigo-400 mb-3"></i>
-                        <p class="text-sm font-medium text-slate-200" id="fileLabel">Click to browse or drag & drop .eml file here</p>
-                        <p class="text-xs text-slate-500 mt-1">Supports up to 50MB</p>
+                    <div class="border-2 border-dashed border-slate-700 hover:border-indigo-500 transition rounded-xl p-6 sm:p-8 text-center cursor-pointer bg-slate-950/50" onclick="document.getElementById('emlFileInput').click()">
+                        <i class="fa-solid fa-cloud-arrow-up text-3xl sm:text-4xl text-indigo-400 mb-3"></i>
+                        <p class="text-xs sm:text-sm font-medium text-slate-200" id="fileLabel">Click to browse or drag & drop .eml file here</p>
+                        <p class="text-[11px] text-slate-500 mt-1">Supports up to 50MB</p>
                         <input type="file" id="emlFileInput" class="hidden" accept=".eml,.msg,.txt">
                     </div>
                 </div>
                 
-                <button type="button" id="uploadBtn" class="mt-6 w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-xl transition shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2">
+                <button type="button" id="uploadBtn" class="mt-6 w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-xl transition shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 text-sm">
                     <i class="fa-solid fa-radar"></i> Run 16-Engine Phishing Analysis
                 </button>
             </div>
 
-            
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl flex flex-col justify-between">
                 <div>
-                    <h2 class="text-lg font-bold text-white flex items-center gap-2 mb-2">
+                    <h2 class="text-base sm:text-lg font-bold text-white flex items-center gap-2 mb-2">
                         <i class="fa-solid fa-terminal text-indigo-400"></i> Direct Raw Content Submission
                     </h2>
-                    <p class="text-sm text-slate-400 mb-4">Test raw email content, headers, and malicious payloads directly against heuristics.</p>
+                    <p class="text-xs sm:text-sm text-slate-400 mb-4">Test raw email content, headers, and malicious payloads directly against heuristics.</p>
                     
                     <div class="space-y-3">
-                        <div class="grid grid-cols-2 gap-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
                                 <label class="text-xs text-slate-400 font-medium">Sender From</label>
                                 <input type="text" id="rawSender" placeholder="security@microsoft-support.xyz" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
@@ -164,92 +157,91 @@
                     </div>
                 </div>
 
-                <div class="flex gap-3 mt-4">
-                    <button type="button" id="loadSamplePhish" class="w-1/2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium py-3 rounded-xl transition text-sm">
+                <div class="flex flex-col sm:flex-row gap-3 mt-4">
+                    <button type="button" id="loadSamplePhish" class="w-full sm:w-1/2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium py-3 rounded-xl transition text-sm">
                         Load Sample Phish
                     </button>
-                    <button type="button" id="submitTextBtn" class="w-1/2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-xl transition shadow-lg shadow-indigo-600/30 text-sm">
+                    <button type="button" id="submitTextBtn" class="w-full sm:w-1/2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-xl transition shadow-lg shadow-indigo-600/30 text-sm">
                         Analyze Raw Content
                     </button>
                 </div>
             </div>
         </div>
 
-        
-        <div id="loadingOverlay" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex flex-col items-center justify-center space-y-4">
+        <div id="loadingOverlay" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex flex-col items-center justify-center space-y-4 p-4 text-center">
             <div class="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-            <h3 class="text-xl font-bold text-white">Executing Real-Time DNS & 16-Engine Analysis...</h3>
-            <p class="text-sm text-slate-400">Querying live SPF, DMARC, MX records, VirusTotal, and OpenPhish feeds...</p>
+            <h3 class="text-lg sm:text-xl font-bold text-white">Executing Real-Time DNS & 16-Engine Analysis...</h3>
+            <p class="text-xs sm:text-sm text-slate-400">Querying live SPF, DMARC, MX records, VirusTotal, and OpenPhish feeds...</p>
         </div>
 
-        
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl">
             <div class="flex items-center justify-between mb-6">
-                <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                <h2 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
                     <i class="fa-solid fa-lock text-indigo-400"></i> Private Analysis History (Your Session Only)
                 </h2>
-                <span class="text-xs text-slate-400">Isolated &amp; Secured per Session</span>
+                <span class="text-xs text-slate-400">Strictly Confirmed & Isolated</span>
             </div>
 
             {% if history %}
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="border-b border-slate-800 text-xs text-slate-400 uppercase tracking-wider">
-                            <th class="py-3 px-4">Analysis ID</th>
-                            <th class="py-3 px-4">Timestamp</th>
-                            <th class="py-3 px-4">Subject</th>
-                            <th class="py-3 px-4">Sender</th>
-                            <th class="py-3 px-4">Risk Score</th>
-                            <th class="py-3 px-4">Severity</th>
-                            <th class="py-3 px-4">Verdict</th>
-                            <th class="py-3 px-4 text-right">View Report</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-800/60 text-sm">
-                        {% for item in history %}
-                        <tr class="hover:bg-slate-800/40 transition">
-                            <td class="py-3 px-4 font-mono text-xs text-indigo-400">{{ item.analysis_id[:8] }}...</td>
-                            <td class="py-3 px-4 text-xs text-slate-400">{{ item.timestamp[:19].replace('T', ' ') }}</td>
-                            <td class="py-3 px-4 font-medium text-white max-w-xs truncate">{{ item.subject }}</td>
-                            <td class="py-3 px-4 text-slate-300 max-w-xs truncate">{{ item.from }}</td>
-                            <td class="py-3 px-4 font-bold 
-                                {% if item.risk_score > 80 %} text-rose-400 
-                                {% elif item.risk_score > 60 %} text-amber-400 
-                                {% elif item.risk_score > 40 %} text-yellow-400 
-                                {% else %} text-emerald-400 {% endif %}">
-                                {{ item.risk_score }}/100
-                            </td>
-                            <td class="py-3 px-4">
-                                <span class="px-2.5 py-1 rounded-full text-xs font-semibold
-                                    {% if item.severity == 'Critical Phishing' or item.severity == 'High Risk' %} bg-rose-500/10 text-rose-400 border border-rose-500/20
-                                    {% else %} bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 {% endif %}">
-                                    {{ item.severity }}
-                                </span>
-                            </td>
-                            <td class="py-3 px-4 text-xs font-semibold text-slate-300">{{ item.verdict }}</td>
-                            <td class="py-3 px-4 text-right">
-                                <a href="/report/{{ item.analysis_id }}" title="Open Forensic Report" class="inline-flex items-center justify-center bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white w-9 h-9 rounded-xl transition border border-indigo-500/30 shadow-lg shadow-indigo-600/20">
-                                    <i class="fa-solid fa-eye"></i>
-                                </a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+            <div class="overflow-x-auto -mx-5 sm:mx-0">
+                <div class="inline-block min-w-full align-middle px-5 sm:px-0">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-slate-800 text-xs text-slate-400 uppercase tracking-wider">
+                                <th class="py-3 px-3">ID</th>
+                                <th class="py-3 px-3">Timestamp</th>
+                                <th class="py-3 px-3">Subject</th>
+                                <th class="py-3 px-3">Sender</th>
+                                <th class="py-3 px-3">Risk Score</th>
+                                <th class="py-3 px-3">Severity</th>
+                                <th class="py-3 px-3">Verdict</th>
+                                <th class="py-3 px-3 text-right">Report</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800/60 text-sm">
+                            {% for item in history %}
+                            <tr class="hover:bg-slate-800/40 transition">
+                                <td class="py-3 px-3 font-mono text-xs text-indigo-400">{{ item.analysis_id[:8] }}...</td>
+                                <td class="py-3 px-3 text-xs text-slate-400 whitespace-nowrap">{{ item.timestamp[:19].replace('T', ' ') }}</td>
+                                <td class="py-3 px-3 font-medium text-white max-w-[200px] truncate">{{ item.subject }}</td>
+                                <td class="py-3 px-3 text-slate-300 max-w-[150px] truncate">{{ item.from }}</td>
+                                <td class="py-3 px-3 font-bold whitespace-nowrap 
+                                    {% if item.risk_score > 80 %} text-rose-400 
+                                    {% elif item.risk_score > 60 %} text-amber-400 
+                                    {% elif item.risk_score > 40 %} text-yellow-400 
+                                    {% else %} text-emerald-400 {% endif %}">
+                                    {{ item.risk_score }}/100
+                                </td>
+                                <td class="py-3 px-3 whitespace-nowrap">
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-semibold
+                                        {% if item.severity == 'Critical Phishing' or item.severity == 'High Risk' %} bg-rose-500/10 text-rose-400 border border-rose-500/20
+                                        {% else %} bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 {% endif %}">
+                                        {{ item.severity }}
+                                    </span>
+                                </td>
+                                <td class="py-3 px-3 text-xs font-semibold text-slate-300 whitespace-nowrap">{{ item.verdict }}</td>
+                                <td class="py-3 px-3 text-right whitespace-nowrap">
+                                    <a href="/report/{{ item.analysis_id }}" title="Open Forensic Report" class="inline-flex items-center justify-center bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white w-9 h-9 rounded-xl transition border border-indigo-500/30 shadow-lg shadow-indigo-600/20">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
             {% else %}
             <div class="text-center py-12">
                 <i class="fa-solid fa-shield text-5xl text-slate-700 mb-3"></i>
-                <p class="text-slate-400">No email analyses recorded yet. Upload an .eml file or submit raw content above.</p>
+                <p class="text-xs sm:text-sm text-slate-400">No email analyses recorded in your private session yet. Upload an .eml file or submit raw content above.</p>
             </div>
             {% endif %}
         </div>
     </main>
 
-    
     <footer class="border-t border-slate-800 bg-slate-900/60 py-6 text-center text-xs text-slate-500">
-        <p>PhishGuard Enterprise Security Platform &bull; OWASP Top 10 Hardened &bull; Real-Time DNS Architecture</p>
+        <p>PhishGuard Enterprise Security Platform &bull; OWASP Hardened &bull; Mobile Responsive SOC</p>
     </footer>
 
     <script>
@@ -317,5 +309,5 @@
             }
         });
     </script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a23afd415f697fc7',t:'MTc4NTQ4Mzk4Ng=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
