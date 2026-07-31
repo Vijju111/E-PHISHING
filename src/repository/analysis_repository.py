@@ -6,11 +6,6 @@ from src.database.supabase_client import supabase_client
 from src.logging.logger import logger
 
 class AnalysisRepository:
-    """
-    Repository Pattern for Analysis Results persistence and retrieval.
-    Guarantees that analysis history updates instantly for the user's active session
-    while enforcing strict session isolation so no user can view another user's history or reports.
-    """
     STORAGE_DIR = os.path.expanduser("~/phishing_tool_storage")
     _IN_MEMORY_CACHE = {}
 
@@ -25,11 +20,8 @@ class AnalysisRepository:
     @classmethod
     def save_analysis(cls, analysis_result: dict, session_id: str) -> None:
         analysis_result["session_id"] = session_id
-        
-        # 1. Save to in-memory runtime cache
         cls._IN_MEMORY_CACHE[analysis_result["analysis_id"]] = analysis_result
 
-        # 2. Attempt Supabase persistence if configured
         try:
             if "placeholder" not in settings.SUPABASE_URL:
                 supabase_client.table("analyses").upsert({
@@ -45,7 +37,6 @@ class AnalysisRepository:
         except Exception as e:
             logger.warning("Supabase persistence failed", extra={"extra_data": {"error": str(e)}})
 
-        # 3. Save to session-isolated local history file (Ensures history & total scans update instantly)
         try:
             session_file = cls._get_session_file_path(session_id)
             history = []
@@ -53,7 +44,6 @@ class AnalysisRepository:
                 with open(session_file, "r") as f:
                     history = json.load(f)
             
-            # Remove duplicate entry if re-analyzing same payload
             history = [h for h in history if h.get("analysis_id") != analysis_result["analysis_id"]]
             history.insert(0, {
                 "analysis_id": analysis_result["analysis_id"],
@@ -68,7 +58,6 @@ class AnalysisRepository:
             with open(session_file, "w") as f:
                 json.dump(history[:200], f, indent=2, default=str)
 
-            # Save individual detail file globally so direct report links resolve instantly
             detail_path = os.path.join(cls.STORAGE_DIR, f"details_{analysis_result['analysis_id']}.json")
             with open(detail_path, "w") as f:
                 json.dump(analysis_result, f, indent=2, default=str)
@@ -77,7 +66,6 @@ class AnalysisRepository:
 
     @classmethod
     def get_all_history_for_session(cls, session_id: str) -> list:
-        # Strict session isolation: only return history file belonging to this specific session_id
         session_file = cls._get_session_file_path(session_id)
         if not os.path.exists(session_file):
             return []
@@ -89,11 +77,9 @@ class AnalysisRepository:
 
     @classmethod
     def get_analysis_detail(cls, analysis_id: str, session_id: str) -> Optional[dict]:
-        # 1. Check in-memory runtime cache first
         if analysis_id in cls._IN_MEMORY_CACHE:
             return cls._IN_MEMORY_CACHE[analysis_id]
 
-        # 2. Check local JSON file
         detail_path = os.path.join(cls.STORAGE_DIR, f"details_{analysis_id}.json")
         if os.path.exists(detail_path):
             try:
@@ -104,7 +90,6 @@ class AnalysisRepository:
             except Exception:
                 pass
 
-        # 3. Query Supabase Cloud PostgreSQL
         try:
             if "placeholder" not in settings.SUPABASE_URL:
                 res = supabase_client.table("analyses").select("full_report").eq("analysis_id", analysis_id).execute()

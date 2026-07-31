@@ -81,7 +81,7 @@
             </div>
             <div class="flex items-center space-x-2">
                 <span class="flex items-center text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-full">
-                    <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse mr-2"></span> Session Isolated & Live DNS Active
+                    <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse mr-2"></span> LocalStorage & History Synchronized
                 </span>
             </div>
         </div>
@@ -91,23 +91,23 @@
         <div class="grid grid-cols-2 md:grid-cols-5 gap-3 sm:gap-4">
             <div class="bg-slate-900 border border-slate-800 p-4 sm:p-5 rounded-2xl col-span-2 md:col-span-1">
                 <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Total Scans</p>
-                <p class="text-2xl sm:text-3xl font-black text-white mt-1 sm:mt-2">{{ stats.total_scans }}</p>
+                <p id="statTotal" class="text-2xl sm:text-3xl font-black text-white mt-1 sm:mt-2">0</p>
             </div>
             <div class="bg-slate-900 border border-slate-800 p-4 sm:p-5 rounded-2xl">
                 <p class="text-xs text-rose-400 uppercase tracking-wider font-semibold">Critical Threat</p>
-                <p class="text-2xl sm:text-3xl font-black text-rose-400 mt-1 sm:mt-2">{{ stats.critical_count }}</p>
+                <p id="statCritical" class="text-2xl sm:text-3xl font-black text-rose-400 mt-1 sm:mt-2">0</p>
             </div>
             <div class="bg-slate-900 border border-slate-800 p-4 sm:p-5 rounded-2xl">
                 <p class="text-xs text-amber-400 uppercase tracking-wider font-semibold">High Risk</p>
-                <p class="text-2xl sm:text-3xl font-black text-amber-400 mt-1 sm:mt-2">{{ stats.high_count }}</p>
+                <p id="statHigh" class="text-2xl sm:text-3xl font-black text-amber-400 mt-1 sm:mt-2">0</p>
             </div>
             <div class="bg-slate-900 border border-slate-800 p-4 sm:p-5 rounded-2xl">
                 <p class="text-xs text-yellow-400 uppercase tracking-wider font-semibold">Suspicious</p>
-                <p class="text-2xl sm:text-3xl font-black text-yellow-400 mt-1 sm:mt-2">{{ stats.suspicious_count }}</p>
+                <p id="statSuspicious" class="text-2xl sm:text-3xl font-black text-yellow-400 mt-1 sm:mt-2">0</p>
             </div>
             <div class="bg-slate-900 border border-slate-800 p-4 sm:p-5 rounded-2xl">
                 <p class="text-xs text-emerald-400 uppercase tracking-wider font-semibold">Safe / Legitimate</p>
-                <p class="text-2xl sm:text-3xl font-black text-emerald-400 mt-1 sm:mt-2">{{ stats.safe_count }}</p>
+                <p id="statSafe" class="text-2xl sm:text-3xl font-black text-emerald-400 mt-1 sm:mt-2">0</p>
             </div>
         </div>
 
@@ -179,10 +179,9 @@
                 <h2 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
                     <i class="fa-solid fa-lock text-indigo-400"></i> Private Analysis History (Your Session Only)
                 </h2>
-                <span class="text-xs text-slate-400">Strictly Confirmed & Isolated</span>
+                <span class="text-xs text-slate-400">Synchronized & Isolated</span>
             </div>
 
-            {% if history %}
             <div class="overflow-x-auto -mx-5 sm:mx-0">
                 <div class="inline-block min-w-full align-middle px-5 sm:px-0">
                     <table class="w-full text-left border-collapse">
@@ -198,45 +197,16 @@
                                 <th class="py-3 px-3 text-right">Report</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-800/60 text-sm">
-                            {% for item in history %}
-                            <tr class="hover:bg-slate-800/40 transition">
-                                <td class="py-3 px-3 font-mono text-xs text-indigo-400">{{ item.analysis_id[:8] }}...</td>
-                                <td class="py-3 px-3 text-xs text-slate-400 whitespace-nowrap">{{ item.timestamp[:19].replace('T', ' ') }}</td>
-                                <td class="py-3 px-3 font-medium text-white max-w-[200px] truncate">{{ item.subject }}</td>
-                                <td class="py-3 px-3 text-slate-300 max-w-[150px] truncate">{{ item.from }}</td>
-                                <td class="py-3 px-3 font-bold whitespace-nowrap 
-                                    {% if item.risk_score > 80 %} text-rose-400 
-                                    {% elif item.risk_score > 60 %} text-amber-400 
-                                    {% elif item.risk_score > 40 %} text-yellow-400 
-                                    {% else %} text-emerald-400 {% endif %}">
-                                    {{ item.risk_score }}/100
-                                </td>
-                                <td class="py-3 px-3 whitespace-nowrap">
-                                    <span class="px-2.5 py-1 rounded-full text-xs font-semibold
-                                        {% if item.severity == 'Critical Phishing' or item.severity == 'High Risk' %} bg-rose-500/10 text-rose-400 border border-rose-500/20
-                                        {% else %} bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 {% endif %}">
-                                        {{ item.severity }}
-                                    </span>
-                                </td>
-                                <td class="py-3 px-3 text-xs font-semibold text-slate-300 whitespace-nowrap">{{ item.verdict }}</td>
-                                <td class="py-3 px-3 text-right whitespace-nowrap">
-                                    <a href="/report/{{ item.analysis_id }}" title="Open Forensic Report" class="inline-flex items-center justify-center bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white w-9 h-9 rounded-xl transition border border-indigo-500/30 shadow-lg shadow-indigo-600/20">
-                                        <i class="fa-solid fa-eye"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                            {% endfor %}
+                        <tbody id="historyTableBody" class="divide-y divide-slate-800/60 text-sm">
+                            <!-- Populated dynamically via localStorage -->
                         </tbody>
                     </table>
                 </div>
             </div>
-            {% else %}
-            <div class="text-center py-12">
+            <div id="noHistoryMsg" class="text-center py-12 hidden">
                 <i class="fa-solid fa-shield text-5xl text-slate-700 mb-3"></i>
                 <p class="text-xs sm:text-sm text-slate-400">No email analyses recorded in your private session yet. Upload an .eml file or submit raw content above.</p>
             </div>
-            {% endif %}
         </div>
     </main>
 
@@ -245,6 +215,76 @@
     </footer>
 
     <script>
+        const serverHistory = JSON.parse('{{ history | tojson | safe }}');
+        let localHistory = JSON.parse(localStorage.getItem('phishguard_persistent_history') || '[]');
+
+        const mergedMap = new Map();
+        [...serverHistory, ...localHistory].forEach(item => {
+            if (item && item.analysis_id) {
+                mergedMap.set(item.analysis_id, item);
+            }
+        });
+        const finalHistory = Array.from(mergedMap.values()).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        localStorage.setItem('phishguard_persistent_history', JSON.stringify(finalHistory));
+
+        function renderDashboard() {
+            const tbody = document.getElementById('historyTableBody');
+            const noMsg = document.getElementById('noHistoryMsg');
+            tbody.innerHTML = '';
+
+            if (finalHistory.length === 0) {
+                noMsg.classList.remove('hidden');
+                return;
+            }
+            noMsg.classList.add('hidden');
+
+            let total = finalHistory.length;
+            let critical = 0, high = 0, suspicious = 0, safe = 0;
+
+            finalHistory.forEach(item => {
+                const rs = item.risk_score || 0;
+                if (rs > 80) critical++;
+                else if (rs > 60) high++;
+                else if (rs > 40) suspicious++;
+                else safe++;
+
+                let colorClass = rs > 80 ? 'text-rose-400' : (rs > 60 ? 'text-amber-400' : (rs > 40 ? 'text-yellow-400' : 'text-emerald-400'));
+                let badgeClass = (item.severity === 'Critical Phishing' || item.severity === 'High Risk') ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-800/40 transition';
+                tr.innerHTML = `
+                    <td class="py-3 px-3 font-mono text-xs text-indigo-400">${item.analysis_id.substring(0, 8)}...</td>
+                    <td class="py-3 px-3 text-xs text-slate-400 whitespace-nowrap">${(item.timestamp || '').substring(0, 19).replace('T', ' ')}</td>
+                    <td class="py-3 px-3 font-medium text-white max-w-[200px] truncate">${item.subject || 'N/A'}</td>
+                    <td class="py-3 px-3 text-slate-300 max-w-[150px] truncate">${item.from || 'N/A'}</td>
+                    <td class="py-3 px-3 font-bold whitespace-nowrap ${colorClass}">${rs}/100</td>
+                    <td class="py-3 px-3 whitespace-nowrap"><span class="px-2.5 py-1 rounded-full text-xs font-semibold ${badgeClass}">${item.severity || 'Safe'}</span></td>
+                    <td class="py-3 px-3 text-xs font-semibold text-slate-300 whitespace-nowrap">${item.verdict || 'LEGITIMATE'}</td>
+                    <td class="py-3 px-3 text-right whitespace-nowrap">
+                        <a href="/report/${item.analysis_id}" title="Open Forensic Report" class="inline-flex items-center justify-center bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white w-9 h-9 rounded-xl transition border border-indigo-500/30 shadow-lg shadow-indigo-600/20">
+                            <i class="fa-solid fa-eye"></i>
+                        </a>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('statTotal').textContent = total;
+            document.getElementById('statCritical').textContent = critical;
+            document.getElementById('statHigh').textContent = high;
+            document.getElementById('statSuspicious').textContent = suspicious;
+            document.getElementById('statSafe').textContent = safe;
+        }
+
+        renderDashboard();
+
+        window.addEventListener('pageshow', (event) => {
+            if (event.persisted) {
+                window.location.reload();
+            }
+        });
+
         const fileInput = document.getElementById('emlFileInput');
         const fileLabel = document.getElementById('fileLabel');
 
@@ -268,7 +308,18 @@
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
                 if (response.data.status === 'success') {
-                    window.location.href = `/report/${response.data.analysis_id}`;
+                    const newRes = response.data.result;
+                    localHistory.unshift({
+                        analysis_id: newRes.analysis_id,
+                        timestamp: newRes.timestamp,
+                        subject: newRes.parsed.metadata.subject,
+                        from: newRes.parsed.metadata.from,
+                        risk_score: newRes.scoring.risk_score,
+                        severity: newRes.scoring.severity,
+                        verdict: newRes.scoring.verdict
+                    });
+                    localStorage.setItem('phishguard_persistent_history', JSON.stringify(localHistory));
+                    window.location.href = `/report/${newRes.analysis_id}`;
                 }
             } catch (err) {
                 alert('Analysis failed: ' + (err.response?.data?.detail || err.message));
@@ -301,7 +352,18 @@
             try {
                 const response = await axios.post('/api/v1/analyze/text', formData);
                 if (response.data.status === 'success') {
-                    window.location.href = `/report/${response.data.analysis_id}`;
+                    const newRes = response.data.result;
+                    localHistory.unshift({
+                        analysis_id: newRes.analysis_id,
+                        timestamp: newRes.timestamp,
+                        subject: newRes.parsed.metadata.subject,
+                        from: newRes.parsed.metadata.from,
+                        risk_score: newRes.scoring.risk_score,
+                        severity: newRes.scoring.severity,
+                        verdict: newRes.scoring.verdict
+                    });
+                    localStorage.setItem('phishguard_persistent_history', JSON.stringify(localHistory));
+                    window.location.href = `/report/${newRes.analysis_id}`;
                 }
             } catch (err) {
                 alert('Analysis failed: ' + (err.response?.data?.detail || err.message));
@@ -309,5 +371,5 @@
             }
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a23afd415f697fc7',t:'MTc4NTQ4Mzk4Ng=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>

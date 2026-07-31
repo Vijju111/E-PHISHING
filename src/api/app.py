@@ -26,16 +26,15 @@ async def favicon():
     return FastAPIResponse(status_code=204)
 
 def get_or_create_session(request: Request, response: Response) -> str:
-    """
-    Retrieves and validates the encrypted session token enforcing a strict 1-hour expiration (3600 seconds).
-    """
     token = request.cookies.get("phishguard_session")
     if token:
         try:
             data = verify_secure_session_token(token, max_age=3600)
-            new_token = create_secure_session_token(data)
-            response.set_cookie(key="phishguard_session", value=new_token, httponly=True, secure=False, samesite="lax", max_age=3600)
-            return data.get("session_id")
+            session_id = data.get("session_id")
+            if session_id:
+                new_token = create_secure_session_token({"session_id": session_id})
+                response.set_cookie(key="phishguard_session", value=new_token, httponly=True, secure=False, samesite="lax", max_age=3600)
+                return session_id
         except HTTPException:
             pass
             
@@ -130,7 +129,6 @@ Content-Type: text/plain; charset="utf-8"
 @app.get("/report/{analysis_id}", response_class=HTMLResponse)
 async def view_report(request: Request, response: Response, analysis_id: str):
     session_id = get_or_create_session(request, response)
-    # Allow viewing report directly whether in local or remote mode
     detail = AnalysisRepository.get_analysis_detail(analysis_id, session_id)
     if not detail:
         raise HTTPException(status_code=404, detail="Report not found.")
