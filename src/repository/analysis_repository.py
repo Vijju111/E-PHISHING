@@ -8,17 +8,25 @@ from src.logging.logger import logger
 class AnalysisRepository:
     """
     Repository Pattern for Analysis Results persistence and retrieval.
-    Guarantees that analysis reports are stored in memory/local cache as well as Supabase,
-    preventing 404 Not Found errors on redirect.
+    Guarantees that analysis history updates instantly for the user's active session
+    while enforcing strict session isolation so no user can view another user's history or reports.
     """
     STORAGE_DIR = os.path.expanduser("~/phishing_tool_storage")
     _IN_MEMORY_CACHE = {}
 
     @classmethod
+    def _get_session_file_path(cls, session_id: str) -> str:
+        os.makedirs(cls.STORAGE_DIR, exist_ok=True)
+        clean_sid = "".join(c for c in session_id if c.isalnum() or c in "_-")
+        if not clean_sid:
+            clean_sid = "default_session"
+        return os.path.join(cls.STORAGE_DIR, f"history_{clean_sid}.json")
+
+    @classmethod
     def save_analysis(cls, analysis_result: dict, session_id: str) -> None:
         analysis_result["session_id"] = session_id
         
-        # 1. Save to in-memory runtime cache (Guarantees instant availability)
+        # 1. Save to in-memory runtime cache
         cls._IN_MEMORY_CACHE[analysis_result["analysis_id"]] = analysis_result
 
         # 2. Attempt Supabase persistence if configured
@@ -37,15 +45,15 @@ class AnalysisRepository:
         except Exception as e:
             logger.warning("Supabase persistence failed", extra={"extra_data": {"error": str(e)}})
 
-        # 3. Save to local storage file
+        # 3. Save to session-isolated local history file (Ensures history & total scans update instantly)
         try:
-            os.makedirs(cls.STORAGE_DIR, exist_ok=True)
-            session_file = os.path.join(cls.STORAGE_DIR, f"history_{session_id}.json")
+            session_file = cls._get_session_file_path(session_id)
             history = []
             if os.path.exists(session_file):
                 with open(session_file, "r") as f:
                     history = json.load(f)
             
+            # Remove duplicate entry if re-analyzing same payload
             history = [h for h in history if h.get("analysis_id") != analysis_result["analysis_id"]]
             history.insert(0, {
                 "analysis_id": analysis_result["analysis_id"],
@@ -60,6 +68,7 @@ class AnalysisRepository:
             with open(session_file, "w") as f:
                 json.dump(history[:200], f, indent=2, default=str)
 
+            # Save individual detail file globally so direct report links resolve instantly
             detail_path = os.path.join(cls.STORAGE_DIR, f"details_{analysis_result['analysis_id']}.json")
             with open(detail_path, "w") as f:
                 json.dump(analysis_result, f, indent=2, default=str)
@@ -68,7 +77,8 @@ class AnalysisRepository:
 
     @classmethod
     def get_all_history_for_session(cls, session_id: str) -> list:
-        session_file = os.path.join(cls.STORAGE_DIR, f"history_{session_id}.json")
+        # Strict session isolation: only return history file belonging to this specific session_id
+        session_file = cls._get_session_file_path(session_id)
         if not os.path.exists(session_file):
             return []
         try:
@@ -79,7 +89,7 @@ class AnalysisRepository:
 
     @classmethod
     def get_analysis_detail(cls, analysis_id: str, session_id: str) -> Optional[dict]:
-        # 1. Check in-memory runtime cache first (Lightning fast, zero latency)
+        # 1. Check in-memory runtime cache first
         if analysis_id in cls._IN_MEMORY_CACHE:
             return cls._IN_MEMORY_CACHE[analysis_id]
 
